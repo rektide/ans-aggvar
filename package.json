@@ -1,0 +1,23 @@
+{
+	"name": "aggvar",
+	"version": "0.0.1",
+	"description": "Ansible Variable Aggregator",
+	"main": "server.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		 "url": "git@github.com:rektide/aggvar"
+	},
+	"keywords": [
+		"ansible"
+	],
+	"author": "Matthew Fowle",
+	"license": "BSD",
+	"dependencies": {
+		"yaml": ">= 0.2.3",
+		"glob": ">= 3.1.14",
+		"q": "0.8.10"
+	}
+}
