@@ -105,6 +105,11 @@ addAll(promises).then(function(objs){
 			ret= ret.concat(objs[i])
 		}
 	}
+	if(vars.prefix){
+		wrap= {}
+		wrap[vars.prefix]= ret
+		ret= wrap
+	}
 	ret= {"changed":true, "ansible_facts":ret}
 	console.log(util.inspect(ret))
 }).fail(function(err){
