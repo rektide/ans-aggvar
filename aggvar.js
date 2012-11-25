@@ -1,6 +1,7 @@
 var glob= require("glob"),
   Q= require("q"),
   fs= require("fs"),
+  yaml= require("yaml"),
   util= require("util")
 
 var glob= Q.nbind(glob),
@@ -112,7 +113,7 @@ addAll(promises).then(function(objs){
 		ret= wrap
 	}
 	ret= {"changed":true, "ansible_facts":ret}
-	console.log(util.inspect(ret))
+	console.log(util.inspect(ret,false,999))
 }).fail(function(err){
 	throw err
-})
+}).done()
