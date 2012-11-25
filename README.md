@@ -1,8 +1,8 @@
-= Aggvar =
+# Aggvar #
 
 Aggvar is an attempt at an Ansible module which composes multiple external json and yaml files into a single ansible_fact.
 
-= Status =
+# Status #
 
 At present this module does not work:
 
