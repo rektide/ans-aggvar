@@ -1,6 +1,7 @@
 var glob= require("glob"),
   Q= require("q"),
-  fs= require("fs")
+  fs= require("fs"),
+  util= require("util")
 
 var glob= Q.nbind(glob),
   readFile= Q.nbind(fs.readFile)
@@ -21,51 +22,91 @@ if(!vars.yaml && !vars.json){
 	return
 }
 
+
+function addAll(arr){
+	return Q.all(arr).then(function(){
+		var ret= []
+		for(var i in arguments){
+			ret= ret.concat.apply(ret,arguments[i])
+		}
+		return Q.all(ret)
+	})
+}
+
 var promises= []
 
 if(vars.yaml){
-        var yamls= vars.yaml.split(",")
+	var yamls= vars.yaml.split(",")
 	for(var i in yamls){
-		var processed= glob(yamls[i]).then(function(yamlFilename){
-			return readFile(yamlFilename)
-		}).then(function(yamlContents){
-			return yaml.eval(yamlContents)
+		var globPromise= glob(yamls[i])
+		.then(function(yamlFilenames){
+			var evalled= []
+			for(var j in yamlFilenames){
+				var filename= yamlFilenames[j],
+				  evalPromise= readFile(filename,"utf-8")
+				.then(function(yamlContents){
+					return yaml.eval(yamlContents)
+				})
+				evalled.push(evalPromise)
+			}
+			return evalled
 		})
-		promises.push(processed)
+		promises.push(globPromise)
 	}
-}
-
-function addAll(arr){
-	return Q.all(arr).then(function(arr){
-		
-	})
 }
 
 if(vars.json){
 	var jsons= vars.json.split(",")
 	for(var i in jsons){
-		var globs= glob(jsons[i])
+		var globPromise= glob(jsons[i])
 		.then(function(jsonFilenames){
-			console.log("FILE",jsonFilenames)
 			var evalled= []
 			for(var j in jsonFilenames){
 				var filename= jsonFilenames[j],
 				  evalPromise= readFile(filename,"utf-8")
 				.then(function(jsonContents){
-					console.log("CONTENT",jsonContents)
 					return JSON.parse(jsonContents)
 				})
 				evalled.push(evalPromise)
 			}
-			return Q.all(evalled)
-			//return evalled
+			return evalled
 		})
-		promises.push(globs)
+		promises.push(globPromise)
 	}
 }
 
-Q.all(promises).then(function(objs){
-	console.log("HI",arguments,objs)
-},function(err){
-	console.error("NO GOOD",arguments)
+addAll(promises).then(function(objs){
+	var arr= false,
+	  obj= false
+	for(var i in objs){
+		if(objs[i] instanceof Array)
+			arr= true
+		else if (objs[i] instanceof Object)
+			obj= true
+	}
+	if(arr && obj)
+		throw "Invalid return"
+	if((!arr) && (!obj)){
+		console.log('{"changed":false}')
+		return
+	}
+	var ret
+	if(obj){
+		ret= {}
+		for(var i in objs){
+			var e= objs[i]
+			for(var j in e){
+				ret[j]= e[j]
+			}
+		}
+	}else{
+		ret= []
+		for(var i in objs){
+			ret= ret.concat(objs[i])
+		}
+	}
+	ret= {"changed":true, "ansible_facts":ret}
+	console.log(util.inspect(ret))
+}).fail(function(err){
+	throw err
 })
