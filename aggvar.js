@@ -9,6 +9,8 @@ var glob= Q.nbind(glob),
 var vars= {},
   result= {}
 
+//console.log("ARGS,CWD",process.cwd(),process.argv)
+
 for(var i in process.argv){
 	var arg= process.argv[i],
 	  frags= arg.split("=")
@@ -21,7 +23,6 @@ if(!vars.yaml && !vars.json){
 	console.log('{"changed":false}')
 	return
 }
-
 
 function addAll(arr){
 	return Q.all(arr).then(function(){

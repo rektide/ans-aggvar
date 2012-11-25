@@ -1,0 +1,19 @@
+#!/bin/sh
+TEMP=$(mktemp -d aggvar.XXXXXXXXXX)
+cd $TEMP
+
+// "prod"
+git clone https://github.com/rektide/ans-aggvar
+
+// "test"
+//cp -aur ~rektide/projects/aggvar ans-aggvar
+
+cd ans-aggvar
+npm install
+
+ARGS=$(cat $1)
+node aggvar.js $ARGS 2>&1 | tee -a /tmp/AGGLOG
+
+// clean
+cd ../..
+rm -rf $TEMP
